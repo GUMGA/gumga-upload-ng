@@ -1,6 +1,6 @@
 {
   "name": "gumga-upload-ng",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Gumga Upload",
   "main": "./src/upload.js",
   "directories": {

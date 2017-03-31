@@ -6,17 +6,21 @@
 
   Upload.$inject = ['$http', '$parse', '$timeout', '$compile'];
   function Upload($http, $parse, $timeout, $compile) {
-    var templateBebin = '\n        <div class="full-width-without-padding">\n            <div ng-click="fireClick()" ng-show="flag" class="col-md-1" tooltip="{{::tooltipText}}" tooltip-placement="right">';
+    var templateBebin = '\n        <div class="full-width-without-padding" style="text-align: center;margin: 2px;">\n            <div ng-click="fireClick()" ng-show="flag" class="col-md-1" tooltip="{{::tooltipText}}" tooltip-placement="right">';
 
-    var defaultAvatar = '\n        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="128px" height="128px" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">\n            <path id="avatar" fill="#cccccc" d="M490.579,383.029c-14.152-22.086-61.763-35.824-108.835-55.453c-47.103-19.633-58.268-26.439-58.268-26.439\n                l-0.445-45.182c0,0,17.646-13.557,23.127-56.074c11.01,3.198,22.619-16.461,23.237-26.824c0.625-9.98-1.508-37.662-14.981-34.877\n                c2.754-20.845,4.741-39.586,3.764-49.505c-3.495-36.295-39.23-74.578-94.182-74.578c-54.95,0-90.7,38.283-94.193,74.578\n                c-0.978,9.919,1.019,28.661,3.758,49.505c-13.455-2.785-15.587,24.897-14.979,34.877c0.635,10.363,12.196,30.021,23.255,26.824\n                c5.462,42.517,23.122,56.074,23.122,56.074l-0.441,45.182c0,0-11.178,6.807-58.268,26.439\n                c-47.104,19.629-94.683,33.367-108.851,55.453c-12.7,19.777-8.882,114.875-8.882,114.875h470.946\n                C499.462,497.904,503.281,402.806,490.579,383.029z"/>\n        </svg>';
+    var defaultAvatar = '\n\n        <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" ng-attr-width="{{imageWidth}}" ng-attr-height="{{imageHeight}}" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve">\n            <path id="avatar" fill="#cccccc" d="M490.579,383.029c-14.152-22.086-61.763-35.824-108.835-55.453c-47.103-19.633-58.268-26.439-58.268-26.439\n                l-0.445-45.182c0,0,17.646-13.557,23.127-56.074c11.01,3.198,22.619-16.461,23.237-26.824c0.625-9.98-1.508-37.662-14.981-34.877\n                c2.754-20.845,4.741-39.586,3.764-49.505c-3.495-36.295-39.23-74.578-94.182-74.578c-54.95,0-90.7,38.283-94.193,74.578\n                c-0.978,9.919,1.019,28.661,3.758,49.505c-13.455-2.785-15.587,24.897-14.979,34.877c0.635,10.363,12.196,30.021,23.255,26.824\n                c5.462,42.517,23.122,56.074,23.122,56.074l-0.441,45.182c0,0-11.178,6.807-58.268,26.439\n                c-47.104,19.629-94.683,33.367-108.851,55.453c-12.7,19.777-8.882,114.875-8.882,114.875h470.946\n                C499.462,497.904,503.281,402.806,490.579,383.029z"/>\n        </svg>';
 
-    var avatar = '\n        <img id="avatar" ng-src="{{avatar}}" width="128px" height="128px">';
+    var avatar = '\n        <img id="avatar" ng-src="{{avatar}}" width="128px" height="128px" style="text-align: center" >';
 
-    var templateEnd = '\n            </div>\n            <img src="#" alt="Uploaded Image" ng-show="!flag" class="img-rounded" />\n            <input type="file" name="upload" id="upload" ng-hide="true"/>\n            <div class="col-md-12">\n                <button type="button" class="btn btn-link" ng-hide="flag" ng-click="deleteImage()"> Delete Image <span class="glyphicon glyphicon-trash"></span></button>\n            </div>\n        </div>';
+    var templateEnd = '\n            </div>\n            <img src="#" alt="Uploaded Image" ng-show="!flag" class="img-rounded"/>\n            <input type="file" name="upload" id="upload" ng-hide="true"/>\n            <div style="display: block;">\n                <button type="button" class="btn btn-link" ng-hide="flag" ng-click="deleteImage()"> Delete Image <span class="glyphicon glyphicon-trash"></span></button>\n            </div>\n        </div>';
 
     link.$inject = ['$scope', '$element', '$attrs'];
 
     function link($scope, $element, $attrs) {
+
+      $scope.imageHeight = $scope.imageHeight || 128;
+      $scope.imageWidth = $scope.imageWidth || 128;
+
       var model = $parse($attrs.attribute),
           modelSetter = model.assign,
           reader = new FileReader(),
@@ -33,8 +37,9 @@
             $scope.flag = false;
             reader.onloadend = function () {
               image.src = reader.result;
-              image.width = 200;
-              image.height = 200;
+
+              image.width = $scope.imageWidth || 128;
+              image.height = $scope.imageHeight || 128;
               var x = $attrs.attribute.split('.');
               $scope.uploadMethod({ image: $scope[x[0]][x[1]] }).then(function (val) {
                 $scope.model.name = val.data;
@@ -54,8 +59,8 @@
           if ($scope.model.bytes) {
             $scope.flag = false;
             image.src = 'data:' + $scope.model.mimeType + ';base64,' + $scope.model.bytes;
-            image.width = 200;
-            image.height = 200;
+            image.width = $scope.imageWidth || 128;
+            image.height = $scope.imageHeight || 128;
           }
         } else {
           $scope.model = {};
@@ -81,7 +86,8 @@
       $scope.deleteImage = function () {
         image.src = '';
         $scope.flag = true;
-        element[0].files = [];
+
+        // element[0].files = [];
         $scope.deleteMethod();
       };
 
@@ -102,13 +108,14 @@
         uploadMethod: '&',
         deleteMethod: '&',
         tooltipText: '@',
-        avatar: '@'
+        avatar: '@',
+        imageWidth: '@?',
+        imageHeight: '@?'
       },
       link: link
     };
   }
-
-  angular.module('gumga.upload', []).directive('gumgaUpload', Upload);
+  angular.module('gumga.directives.upload', []).directive('gumgaUpload', Upload);
 })();
 
 },{}]},{},[1]);
