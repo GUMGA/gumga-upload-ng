@@ -136,6 +136,6 @@
       link: link
     };
   }
-  angular.module('gumga.directives.upload', [])
+  angular.module('gumga.upload', [])
     .directive('gumgaUpload', Upload);
 })();
