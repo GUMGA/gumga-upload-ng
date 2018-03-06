@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(){function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s}return e})()({1:[function(require,module,exports){
 'use strict';
 
 (function () {
@@ -27,44 +27,66 @@
           element = void 0,
           image = void 0;
 
-      $timeout(function () {
-        element = $element.find('input'), image = $element.find('img')[0];
+      var init = function init() {
+        $timeout(function () {
+          element = $element.find('input'), image = $element.find('img')[0];
 
-        element.bind('change', function () {
-          $scope.$apply(function () {
-            var x = void 0;
-            modelSetter($scope, element[0].files[0]);
-            $scope.flag = false;
-            reader.onloadend = function () {
-              image.src = reader.result;
+          element.bind('change', function () {
+            $scope.$apply(function () {
+              var x = void 0;
+              modelSetter($scope, element[0].files[0]);
+              $scope.flag = false;
+              reader.onloadend = function () {
+                image.src = reader.result;
 
-              image.width = $scope.imageWidth || 128;
-              image.height = $scope.imageHeight || 128;
-              var x = $attrs.attribute.split('.');
-              $scope.uploadMethod({ image: $scope[x[0]][x[1]] }).then(function (val) {
-                $scope.model.name = val.data;
-              });
-            };
-            reader.readAsDataURL(element[0].files[0]);
+                image.width = $scope.imageWidth || 128;
+                image.height = $scope.imageHeight || 128;
+                var x = $attrs.attribute.split('.');
+                $scope.uploadMethod({ image: $scope[x[0]][x[1]] }).then(function (val) {
+                  $scope.model.name = val.data;
+                });
+              };
+              reader.readAsDataURL(element[0].files[0]);
+            });
           });
         });
-      });
+      };
+
+      var initOnImageLoad = function initOnImageLoad() {
+        image = $element.find('img')[0];
+        if (image) {
+          init();
+          onModelModify();
+        } else {
+          $timeout(function () {
+            return initOnImageLoad();
+          });
+        }
+      };
+
+      initOnImageLoad();
 
       $scope.fireClick = function () {
         $element.find('input')[0].click();
       };
 
-      $scope.$watch('model', function () {
+      function onModelModify() {
         if ($scope.model) {
           if ($scope.model.bytes) {
             $scope.flag = false;
-            image.src = 'data:' + $scope.model.mimeType + ';base64,' + $scope.model.bytes;
-            image.width = $scope.imageWidth || 128;
-            image.height = $scope.imageHeight || 128;
+            if (image) {
+              image.src = 'data:' + $scope.model.mimeType + ';base64,' + $scope.model.bytes;
+              image.width = $scope.imageWidth || 128;
+              image.height = $scope.imageHeight || 128;
+            }
           }
         } else {
           $scope.model = {};
         }
+      }
+
+      $scope.$watch('model', function () {
+        onModelModify();
       });
 
       if (!$attrs.attribute) console.error('You must pass an attribute to GumgaUpload');
